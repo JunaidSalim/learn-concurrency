@@ -12,3 +12,4 @@
 
 # Keep the gitignore itself
 !.gitignore
+build/
