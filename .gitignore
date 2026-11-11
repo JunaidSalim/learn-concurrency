@@ -1,0 +1,14 @@
+# Ignore everything
+*
+
+# But keep directories so git can look inside them
+!*/
+
+# Keep source files
+!*.cpp
+!*.h
+!*.hpp
+!*.cc
+
+# Keep the gitignore itself
+!.gitignore
