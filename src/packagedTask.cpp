@@ -20,7 +20,6 @@ void gui_thread() {
   while (true) {
     get_and_process_gui_message();
     if (gui_shutdown_message_received()) break;
-    if (gui_shutdown_message_received()) break;
     std::packaged_task<void()> task;
     {
       std::lock_guard<std::mutex> lk(m);
@@ -34,8 +33,6 @@ void gui_thread() {
   }
 }
 
-std::thread gui_bg_thread(gui_thread);
-
 template <typename Func>
 std::future<void> post_task_for_gui_thread(Func f) {
   std::packaged_task<void()> task(f);
@@ -46,6 +43,7 @@ std::future<void> post_task_for_gui_thread(Func f) {
 }
 
 int main() {
+  std::thread gui_bg_thread(gui_thread);
   cout << "main thread:  " << this_thread::get_id() << endl;
 
   // Post two tasks; they run on the GUI thread, not here
