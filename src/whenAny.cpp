@@ -6,15 +6,13 @@
 #include <vector>
 
 #include "experimentalFuture.h"
+#include "tools.h"
 using namespace std;
 using namespace std::chrono;
 
-const auto t0 = steady_clock::now();
-double ms_since_start() { return duration<double, milli>(steady_clock::now() - t0).count(); }
-
 int slow_task(int value, int delay_ms) {
   this_thread::sleep_for(milliseconds(delay_ms));
-  cout << "[" << ms_since_start() << " ms] task " << value << " finished\n";
+  cout << "[" << tools::ms_since_start() << " ms] task " << value << " finished\n";
   return value;
 }
 
@@ -26,11 +24,11 @@ int main() {
   results.push_back(ts::spawn_async([] { return slow_task(3, 200); }));
 
   auto any = ts::when_any(results.begin(), results.end());
-  cout << "[" << ms_since_start() << " ms] when_all returned immediately; original futures valid? "
+  cout << "[" << tools::ms_since_start() << " ms] when_all returned immediately; original futures valid? "
        << results[0].valid() << " (0 = moved out)\n";
 
   auto ready = any.get();
-  cout << "[" << ms_since_start() << " ms] all ready, sum = ";
+  cout << "[" << tools::ms_since_start() << " ms] all ready, sum = ";
   int sum = 0;
   sum += ready.get();
   cout << sum << " (expected 6)\n";

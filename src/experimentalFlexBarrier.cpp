@@ -7,16 +7,9 @@
 #include <vector>
 
 #include "experimentalBarrier.h"
+#include "tools.h"
 using namespace std;
 using namespace std::chrono;
-
-const auto t0 = steady_clock::now();
-mutex print_mutex;
-void log(const string& what) {
-  lock_guard<mutex> lk(print_mutex);
-  cout << "[" << fixed << setprecision(0)
-       << duration<double, milli>(steady_clock::now() - t0).count() << " ms] " << what << endl;
-}
 
 int main() {
   const int workers = 3;
@@ -27,7 +20,7 @@ int main() {
     ++round_no;
     int total = 0;
     for (int v : partial) total += v;
-    log("  [serial] round " + to_string(round_no) + " complete, total = " + to_string(total));
+    tools::log("  [serial] round " + to_string(round_no) + " complete, total = " + to_string(total));
     return round_no == 2 ? 2 : -1;
   };
   ts::flex_barrier sync(workers, completion);
@@ -36,7 +29,7 @@ int main() {
     for (int round = 1; round <= rounds; round++) {
       this_thread::sleep_for(milliseconds(100 * id));
       partial[id - 1] = id * round;
-      log("worker " + to_string(id) + ": finished round " + to_string(round));
+      tools::log("worker " + to_string(id) + ": finished round " + to_string(round));
       sync.arrive_and_wait();
     }
   };
@@ -46,5 +39,5 @@ int main() {
   threads.emplace_back(worker, 2, 3);
   threads.emplace_back(worker, 3, 2); 
   for (auto& t : threads) t.join();
-  log("done");
+  tools::log("done");
 }

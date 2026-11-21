@@ -4,16 +4,9 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include "tools.h"
 using namespace std;
 using namespace std::chrono;
-
-const auto t0 = steady_clock::now();
-mutex log_mutex;
-void log(const string& who, const string& what) {
-  lock_guard<mutex> lk(log_mutex);
-  cout << "[" << duration_cast<milliseconds>(steady_clock::now() - t0).count() << " ms] " << who
-       << ": " << what << endl;
-}
 
 mutex mut;
 queue<int> data_queue;
@@ -26,10 +19,10 @@ void data_preparation_thread() {
     {
       lock_guard<mutex> lk(mut);
       data_queue.push(i);
-      log("producer", "pushed " + to_string(i));
+      tools::log("producer", "pushed " + to_string(i));
     }
     data_cond.notify_one();
-    log("producer", "notified");
+    tools::log("producer", "notified");
     this_thread::sleep_for(milliseconds(300));
   }
   {
@@ -42,7 +35,7 @@ void data_preparation_thread() {
 void data_processing_thread() {
   while (true) {
     unique_lock<mutex> lk(mut);
-    log("consumer", "checking queue (empty = " + to_string(data_queue.empty()) + ")");
+    tools::log("consumer", "checking queue (empty = " + to_string(data_queue.empty()) + ")");
 
     data_cond.wait(lk, [] { return !data_queue.empty(); });
 
@@ -50,10 +43,10 @@ void data_processing_thread() {
     data_queue.pop();
     lk.unlock();
     if (data == LAST) {
-      log("consumer", "got last item, stopping");
+      tools::log("consumer", "got last item, stopping");
       break;
     }
-    log("consumer", "processing " + to_string(data));
+    tools::log("consumer", "processing " + to_string(data));
   }
 }
 
