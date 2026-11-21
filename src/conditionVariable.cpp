@@ -64,29 +64,3 @@ int main() {
   consumer.join();
   return 0;
 }
-
-void TransmissionLoop() {
-  while(1) {
-    // 1. mutex hold (loc)
-    // 2. if false, loc release, sleep
-    // 3. notified
-      data_cond.wait(loc, [] { return received; });
-
-    if (received) {
-      received = false;
-      SendMessage();
-    } else {
-      continue;
-    }
-  }
-}
-
-void ReceiveLoop() {
-  while(1) {
-    socket.Receive();
-    unique_lock<mutex> lk(mut);
-    data_cond.notify_one();
-    received = true;
-  }
-}
-
